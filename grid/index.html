@@ -4,10 +4,48 @@
 <head>
     <title>React Spreadsheet Grid</title>
     <meta charset="utf-8">
+    <style>
+
+        html,
+        body,
+        #app {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            padding: 20px 50px;
+        }
+
+        .Info__Name {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 40px;
+            font-family: Helvetica;
+            font-weight: bold;
+            color: #626466;
+        }
+
+        .Info__Description {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+            font-family: Helvetica;
+            color: #626466;
+        }
+
+        .GridWrapper {
+            height: calc(100% - 100px);
+            overflow: hidden;
+        }
+
+    </style>
 </head>
 
 <body>
-    <div id="app"></div>
+    <div id="app">
+
+    </div>
     <script src="./build/bundle.js"></script>
 </body>
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Input, Select } from './grid';
+import { Table, Input, Select } from './Grid';
 
 const rows = [];
 const positions = [];
@@ -41,8 +41,14 @@ class GridWrapper extends React.PureComponent {
     }
 
     render() {
-        return (
-            <div className="DataTable">
+        return [
+            <div>
+                <div className="Info__Name">React Spreadsheet Grid</div>
+                <div className="Info__Description">
+                    A customizable, performant and powerful spreadsheet grid component for React
+                </div>
+            </div>,
+            <div className="GridWrapper">
                 <Table
                     columns={[
                         {
@@ -105,7 +111,7 @@ class GridWrapper extends React.PureComponent {
                     cellHeight={50}
                 />
             </div>
-        )
+        ];
     }
 }
 
