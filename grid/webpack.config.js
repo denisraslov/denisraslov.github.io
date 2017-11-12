@@ -1,6 +1,8 @@
 const path = require('path');
 const autoprefixer = require('autoprefixer');
 
+const environment = process.env.NODE_ENV || 'DEV';
+
 const config = {
     module: {
         rules: [
@@ -43,14 +45,38 @@ const config = {
           path.resolve('.'),
           'node_modules'
       ]
-    },
-    entry: [
-        './app.js'
-    ],
-    output: {
-        path: __dirname + '/build',
-        filename: 'bundle.js'
     }
 };
+
+if (environment === 'DEV') {
+    Object.assign(config, {
+        devtool: 'source-map',
+        entry: [
+            'webpack-dev-server/client?http://localhost:5050',
+            'app.js'
+        ],
+        output: {
+            publicPath: 'http://localhost:5050/',
+            filename: 'bundle.js'
+        },
+        devServer: {
+            stats: {
+                warnings: false
+            }
+        }
+    });
+}
+
+if (environment === 'PROD') {
+    Object.assign(config, {
+        entry: [
+            './app.js'
+        ],
+        output: {
+            path: __dirname + '/build',
+            filename: 'bundle.js'
+        }
+    });
+}
 
 module.exports = config;
