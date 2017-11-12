@@ -42,11 +42,16 @@ class GridWrapper extends React.PureComponent {
 
     render() {
         return [
-            <div>
-                <div className="Info__Name">React Spreadsheet Grid</div>
-                <div className="Info__Description">
-                    A customizable, performant and powerful spreadsheet grid component for React
+            <div className="Info">
+                <div>
+                    <div className="Info__Name">React Spreadsheet Grid</div>
+                    <div className="Info__Description">
+                        A customizable, performant and powerful spreadsheet grid component for React
+                    </div>
                 </div>
+                <a href="https://github.com/denisraslov/react-spreadsheet-table" className="Info__Button">
+                    VIEW DOCS ON GITHUB
+                </a>
             </div>,
             <div className="GridWrapper">
                 <Table

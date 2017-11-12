@@ -1,0 +1,56 @@
+html,
+body,
+#app {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    padding: 20px 50px;
+    background: #ECEAE9;
+}
+
+.Info {
+    text-align: left;
+    font-family: Helvetica;
+    position: relative;
+}
+
+.Info__Name {
+    margin-bottom: 10px;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.Info__Description {
+    margin-bottom: 20px;
+    font-size: 19px;
+    font-family: Helvetica;
+    color: #626466;
+}
+
+.Info__Button {
+    color: #4183C4;
+    text-decoration: none;
+    cursor: pointer;
+    background: none;
+    border: 2px solid #4183C4;
+    border-radius: 4px;
+    padding: 8px 16px;
+    transition-duration: .3s;
+    text-transform: uppercase;
+    font-weight: 600;
+    position: absolute;
+    top: 14px;
+    right: 30px;
+}
+
+.Info__Button:hover {
+    background: #4183C4;
+    color: white;
+}
+
+.GridWrapper {
+    height: calc(100% - 100px);
+    overflow: hidden;
+}
