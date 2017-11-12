@@ -18298,16 +18298,25 @@ var GridWrapper = function (_React$PureComponent) {
 
             return [_react2.default.createElement(
                 'div',
-                null,
+                { className: 'Info' },
                 _react2.default.createElement(
                     'div',
-                    { className: 'Info__Name' },
-                    'React Spreadsheet Grid'
+                    null,
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'Info__Name' },
+                        'React Spreadsheet Grid'
+                    ),
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'Info__Description' },
+                        'A customizable, performant and powerful spreadsheet grid component for React'
+                    )
                 ),
                 _react2.default.createElement(
-                    'div',
-                    { className: 'Info__Description' },
-                    'A customizable, performant and powerful spreadsheet grid component for React'
+                    'a',
+                    { href: 'https://github.com/denisraslov/react-spreadsheet-table', className: 'Info__Button' },
+                    'VIEW DOCS ON GITHUB'
                 )
             ), _react2.default.createElement(
                 'div',
