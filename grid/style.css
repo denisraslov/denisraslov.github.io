@@ -58,9 +58,24 @@ body {
 
 .ExampleCodeButton {
     position: absolute;
-    bottom: 20px;
-    right: 20px;
+    bottom: 1px;
+    right: 1px;
     z-index: 20;
+    background: #4183C4;
+    border-radius: 10px;
+    color: white;
+    transition-duration: .3s;
+    padding: 8px 18px;
+    text-decoration: none;
+    font-family: 'Fira Sans', sans-serif;
+    font-size: 13px;
+    border-radius: 12px 0 0 0;
+}
+
+.ExampleCodeButton:hover {
+    opacity: 0.9;
+    padding: 11px 16px;
+    font-size: 14px;
 }
 
 .SpreadsheetGrid__cell_disabled.Grid__photoCell {
