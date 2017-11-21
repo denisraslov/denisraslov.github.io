@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Input, Select } from './Grid';
+import { Grid, Input, Select } from 'react-spreadsheet-grid';
 import set from 'lodash.set';
 import usersData from './../users.json';
 
@@ -79,7 +79,10 @@ class GridWrapper extends React.PureComponent {
 
     render() {
         return [
-            <div className="Info">
+            <div
+                key="info"
+                className="Info"
+            >
                 <div>
                     <div className="Info__Name">React Spreadsheet Grid</div>
                     <div className="Info__Description">
@@ -90,7 +93,10 @@ class GridWrapper extends React.PureComponent {
                     VIEW DOCS ON GITHUB
                 </a>
             </div>,
-            <div className="GridWrapper">
+            <div
+                key="grid"
+                className="GridWrapper"
+            >
                 <a
                     href="https://gist.github.com/denisraslov/d65bc39514e99580b39cd99e9977caf8"
                     target="_blank"

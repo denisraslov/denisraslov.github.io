@@ -4,7 +4,8 @@
   "dependencies": {
     "lodash.set": "^4.3.2",
     "react": "^16.1.0",
-    "react-dom": "^16.1.0"
+    "react-dom": "^16.1.0",
+    "react-spreadsheet-grid": "0.0.2"
   },
   "scripts": {
     "watch": "webpack-dev-server --port 5050 --hot --progress --colors",
