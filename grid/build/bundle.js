@@ -18366,7 +18366,11 @@ var GridWrapper = function (_React$PureComponent) {
                 { className: 'GridWrapper' },
                 _react2.default.createElement(
                     'a',
-                    { className: 'ExampleCodeButton' },
+                    {
+                        href: 'https://gist.github.com/denisraslov/d65bc39514e99580b39cd99e9977caf8',
+                        target: '_blank',
+                        className: 'ExampleCodeButton'
+                    },
                     'Open code snippet'
                 ),
                 _react2.default.createElement(_Grid.Grid, {
