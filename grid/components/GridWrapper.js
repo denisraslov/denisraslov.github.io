@@ -96,7 +96,7 @@ class GridWrapper extends React.PureComponent {
                     target="_blank"
                     className="ExampleCodeButton"
                 >
-                    Open code snippet
+                    Open source code
                 </a>
                 <Grid
                     columns={[
