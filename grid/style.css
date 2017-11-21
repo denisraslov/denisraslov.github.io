@@ -53,6 +53,14 @@ body {
 .GridWrapper {
     height: calc(100% - 140px);
     overflow: hidden;
+    position: relative;
+}
+
+.ExampleCodeButton {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 20;
 }
 
 .SpreadsheetGrid__cell_disabled.Grid__photoCell {
