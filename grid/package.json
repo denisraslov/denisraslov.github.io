@@ -2,6 +2,7 @@
   "name": "react-spreadsheet-grid-demo",
   "description": "react-spreadsheet-grid demo",
   "dependencies": {
+    "lodash.set": "^4.3.2",
     "react": "^16.1.0",
     "react-dom": "^16.1.0"
   },

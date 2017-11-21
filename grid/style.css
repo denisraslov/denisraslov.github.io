@@ -6,13 +6,13 @@ body,
 }
 
 body {
-    padding: 20px 50px;
-    background: #ECEAE9;
+    padding: 20px 30px;
+    background: #efe9e6;
 }
 
 .Info {
     text-align: left;
-    font-family: Helvetica;
+    font-family: 'Fira Sans', sans-serif;
     position: relative;
 }
 
@@ -25,7 +25,7 @@ body {
 .Info__Description {
     margin-bottom: 20px;
     font-size: 19px;
-    font-family: Helvetica;
+    font-family: 'Fira Sans', sans-serif;
     color: #626466;
 }
 
@@ -42,7 +42,7 @@ body {
     font-weight: 600;
     position: absolute;
     top: 14px;
-    right: 30px;
+    right: 0;
 }
 
 .Info__Button:hover {
@@ -51,6 +51,16 @@ body {
 }
 
 .GridWrapper {
-    height: calc(100% - 100px);
+    height: calc(100% - 140px);
     overflow: hidden;
+}
+
+.SpreadsheetGrid__cell_disabled.Grid__photoCell {
+    background: #fff;
+    text-align: center;
+    padding: 6px;
+}
+
+.SpreadsheetGrid__cell_disabled.Grid__photoCell > img {
+    opacity: 1;
 }
