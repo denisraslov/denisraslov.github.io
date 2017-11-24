@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const path = require('path');
 const autoprefixer = require('autoprefixer');
 
@@ -69,6 +70,12 @@ if (environment === 'DEV') {
 
 if (environment === 'PROD') {
     Object.assign(config, {
+        plugins: [
+            new webpack.optimize.UglifyJsPlugin({
+                compress: true,
+                sourceMap: true
+            })
+        ],
         entry: [
             './app.js'
         ],
