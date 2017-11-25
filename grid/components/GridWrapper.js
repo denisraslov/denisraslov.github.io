@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Input, Select } from 'react-spreadsheet-grid';
+import { Grid, Input, Select } from './Grid';
 import set from 'lodash.set';
 import usersData from './../users.json';
 
