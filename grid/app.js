@@ -4,5 +4,5 @@ import GridWrapper from './components/GridWrapper';
 
 ReactDOM.render(
     <GridWrapper />,
-    document.querySelector('#app')
+    document.querySelector('#grid')
 );

@@ -1,6 +1,6 @@
 html,
 body,
-#app {
+.GridWrapper {
     height: 100%;
     overflow: hidden;
 }
@@ -50,7 +50,7 @@ body {
     color: white;
 }
 
-.GridWrapper {
+#grid {
     height: calc(100% - 140px);
     overflow: hidden;
     position: relative;
@@ -62,7 +62,6 @@ body {
     right: 1px;
     z-index: 20;
     background: #4183C4;
-    border-radius: 10px;
     color: white;
     transition-duration: .3s;
     padding: 8px 18px;

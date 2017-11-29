@@ -78,21 +78,7 @@ class GridWrapper extends React.PureComponent {
     }
 
     render() {
-        return [
-            <div
-                key="info"
-                className="Info"
-            >
-                <div>
-                    <div className="Info__Name">React Spreadsheet Grid</div>
-                    <div className="Info__Description">
-                        Excel-like grid component for React with custom cell editors, performant scroll & resizable columns
-                    </div>
-                </div>
-                <a href="https://github.com/denisraslov/react-spreadsheet-table" className="Info__Button">
-                    VIEW DOCS ON GITHUB
-                </a>
-            </div>,
+        return (
             <div
                 key="grid"
                 className="GridWrapper"
@@ -234,7 +220,7 @@ class GridWrapper extends React.PureComponent {
                     }}
                 />
             </div>
-        ];
+        );
     }
 }
 
