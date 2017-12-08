@@ -61,20 +61,20 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 9);
+/******/ 	return __webpack_require__(__webpack_require__.s = 10);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
 /***/ (function(module, exports) {
 
-module.exports = require("react");
+module.exports = require("prop-types");
 
 /***/ }),
 /* 1 */
 /***/ (function(module, exports) {
 
-module.exports = require("prop-types");
+module.exports = require("react");
 
 /***/ }),
 /* 2 */
@@ -215,7 +215,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(19);
+var	fixUrls = __webpack_require__(20);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -4924,11 +4924,54 @@ exports.default = {
 /* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(10);
+"use strict";
 
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.propTypes = undefined;
+
+var _propTypes = __webpack_require__(0);
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var propTypes = exports.propTypes = {
+    columns: _propTypes2.default.arrayOf(_propTypes2.default.shape({
+        id: _propTypes2.default.string,
+        title: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+        value: _propTypes2.default.func.isRequired
+    })).isRequired,
+    rows: _propTypes2.default.arrayOf(_propTypes2.default.any),
+    getRowKey: _propTypes2.default.func.isRequired,
+    placeholder: _propTypes2.default.string,
+    disabledCellChecker: _propTypes2.default.func,
+    focusedCell: _propTypes2.default.shape({
+        x: _propTypes2.default.number.isRequired,
+        y: _propTypes2.default.number.isRequired
+    }),
+    onCellClick: _propTypes2.default.func,
+    blurCurrentFocus: _propTypes2.default.bool,
+
+    // scroll
+    headerHeight: _propTypes2.default.number,
+    rowHeight: _propTypes2.default.number,
+
+    // resize
+    columnWidthValues: _propTypes2.default.object
+};
 
 /***/ }),
 /* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(11);
+
+
+/***/ }),
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4939,15 +4982,15 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Select = exports.Input = exports.Grid = undefined;
 
-var _scrollWrapper = __webpack_require__(11);
+var _scrollWrapper = __webpack_require__(12);
 
 var _scrollWrapper2 = _interopRequireDefault(_scrollWrapper);
 
-var _input = __webpack_require__(26);
+var _input = __webpack_require__(27);
 
 var _input2 = _interopRequireDefault(_input);
 
-var _select = __webpack_require__(29);
+var _select = __webpack_require__(30);
 
 var _select2 = _interopRequireDefault(_select);
 
@@ -4958,7 +5001,7 @@ exports.Input = _input2.default;
 exports.Select = _select2.default;
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4972,23 +5015,31 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(0);
+var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _grid = __webpack_require__(12);
+var _propTypes = __webpack_require__(0);
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+var _grid = __webpack_require__(13);
 
 var _grid2 = _interopRequireDefault(_grid);
 
-var _scrollDummy = __webpack_require__(20);
+var _scrollDummy = __webpack_require__(21);
 
 var _scrollDummy2 = _interopRequireDefault(_scrollDummy);
 
-var _throttleWithRAF = __webpack_require__(23);
+var _throttleWithRAF = __webpack_require__(24);
 
 var _throttleWithRAF2 = _interopRequireDefault(_throttleWithRAF);
 
-var _styles = __webpack_require__(24);
+var _tablePropTypes = __webpack_require__(9);
+
+var _tablePropTypes2 = _interopRequireDefault(_tablePropTypes);
+
+var _styles = __webpack_require__(25);
 
 var _styles2 = _interopRequireDefault(_styles);
 
@@ -5018,7 +5069,7 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
 
         _this.state = {
             first: 0,
-            last: _this.props.rows.length,
+            last: _this.calculateInitialLast(),
             offset: 0,
             columnWidthValues: {}
         };
@@ -5045,10 +5096,17 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
             }
 
             window.addEventListener('resize', this.onResize, false);
-
-            this.setState({
-                last: this.calculateLast(this.state.first)
-            });
+        }
+    }, {
+        key: 'componentWillReceiveProps',
+        value: function componentWillReceiveProps(newProps) {
+            if (newProps.resetScroll) {
+                this.scrollWrapperElement.scrollTop = 0;
+                this.calculateScrollState(false);
+            }
+            if (newProps.rows !== this.state.rows) {
+                this.calculateScrollState(false);
+            }
         }
     }, {
         key: 'componentWillUnmount',
@@ -5211,6 +5269,11 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
             this.currentCoords = e.pageX;
         }
     }, {
+        key: 'calculateInitialLast',
+        value: function calculateInitialLast() {
+            return Math.ceil(window.outerHeight / this.props.rowHeight) + RESERVE_ROWS_COUNT;
+        }
+    }, {
         key: 'calculateLast',
         value: function calculateLast(first) {
             var wrapper = this.scrollWrapperElement;
@@ -5220,28 +5283,49 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
         }
     }, {
         key: 'calculateScrollState',
-        value: function calculateScrollState() {
-            var scrollTop = Math.max(this.scrollWrapperElement.scrollTop, 0);
+        value: function calculateScrollState(isInitCall) {
+            var scrollWrapperElement = this.scrollWrapperElement;
+            var scrollTop = Math.max(scrollWrapperElement.scrollTop, 0);
             var first = Math.max(0, Math.floor(scrollTop / this.props.rowHeight) - RESERVE_ROWS_COUNT);
             var last = Math.min(this.props.rows.length, this.calculateLast(first) + RESERVE_ROWS_COUNT);
 
-            if (first !== this.state.first || last !== this.state.last) {
+            if (isInitCall || first !== this.state.first || last !== this.state.last) {
                 this.setState({
                     first: first,
                     last: last,
-                    offset: first * this.props.rowHeight
+                    offset: first * this.props.rowHeight,
+                    hasScroll: scrollWrapperElement.scrollHeight > scrollWrapperElement.offsetHeight
                 });
+            }
+
+            if (!isInitCall) {
+                if (this.props.onScroll) {
+                    this.props.onScroll(scrollTop);
+                }
+
+                if (this.props.onScrollReachesBottom && scrollWrapperElement.offsetHeight + scrollWrapperElement.scrollTop >= scrollWrapperElement.scrollHeight) {
+                    this.props.onScrollReachesBottom();
+                }
             }
         }
     }, {
         key: 'onResize',
         value: function onResize() {
-            this.calculateScrollState();
+            this.calculateScrollState(false);
         }
     }, {
         key: 'onScroll',
-        value: function onScroll(e) {
-            this.calculateScrollState();
+        value: function onScroll() {
+            this.calculateScrollState(false);
+        }
+    }, {
+        key: 'getHeaderStyle',
+        value: function getHeaderStyle() {
+            if (this.state.hasScroll) {
+                return {
+                    overflowY: 'scroll'
+                };
+            }
         }
     }, {
         key: 'renderResizer',
@@ -5265,7 +5349,10 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
 
             return _react2.default.createElement(
                 'div',
-                { className: 'SpreadsheetGrid__header' },
+                {
+                    className: 'SpreadsheetGrid__header',
+                    style: this.getHeaderStyle()
+                },
                 columns.map(function (column, i) {
                     return _react2.default.createElement(
                         'div',
@@ -5279,7 +5366,7 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
                             }
                         },
                         typeof column.title === 'string' ? column.title : column.title(),
-                        _this5.props.isColumnsResizable && _this5.renderResizer()
+                        _this5.props.isColumnsResizable && i !== columns.length - 1 && _this5.renderResizer()
                     );
                 })
             );
@@ -5329,9 +5416,18 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
     return SpreadsheetGridScrollWrapper;
 }(_react2.default.PureComponent);
 
-SpreadsheetGridScrollWrapper.propTypes = _grid.propTypes;
+SpreadsheetGridScrollWrapper.propTypes = Object.assign({}, _tablePropTypes2.default, {
+    // scroll
+    resetScroll: _propTypes2.default.bool,
+    onScroll: _propTypes2.default.func,
+    onScrollReachesBottom: _propTypes2.default.func,
+    // resize
+    isColumnsResizable: _propTypes2.default.bool,
+    onColumnResize: _propTypes2.default.func
+});
 
 SpreadsheetGridScrollWrapper.defaultProps = {
+    resetScroll: false,
     rows: [],
     isColumnsResizable: false,
     placeholder: 'There are no rows',
@@ -5342,7 +5438,7 @@ SpreadsheetGridScrollWrapper.defaultProps = {
 exports.default = SpreadsheetGridScrollWrapper;
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5351,15 +5447,14 @@ exports.default = SpreadsheetGridScrollWrapper;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.propTypes = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(0);
+var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(1);
+var _propTypes = __webpack_require__(0);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
@@ -5367,11 +5462,11 @@ var _lodash = __webpack_require__(6);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _lodash3 = __webpack_require__(13);
+var _lodash3 = __webpack_require__(14);
 
 var _lodash4 = _interopRequireDefault(_lodash3);
 
-var _lodash5 = __webpack_require__(14);
+var _lodash5 = __webpack_require__(15);
 
 var _lodash6 = _interopRequireDefault(_lodash5);
 
@@ -5383,11 +5478,15 @@ var _keymap = __webpack_require__(8);
 
 var _keymap2 = _interopRequireDefault(_keymap);
 
-var _row = __webpack_require__(15);
+var _tablePropTypes = __webpack_require__(9);
+
+var _tablePropTypes2 = _interopRequireDefault(_tablePropTypes);
+
+var _row = __webpack_require__(16);
 
 var _row2 = _interopRequireDefault(_row);
 
-__webpack_require__(17);
+__webpack_require__(18);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -5738,46 +5837,20 @@ var SpreadsheetGrid = function (_React$PureComponent) {
     return SpreadsheetGrid;
 }(_react2.default.PureComponent);
 
-var propTypes = exports.propTypes = {
-    columns: _propTypes2.default.arrayOf(_propTypes2.default.shape({
-        id: _propTypes2.default.string,
-        title: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
-        value: _propTypes2.default.func.isRequired
-    })).isRequired,
-    rows: _propTypes2.default.arrayOf(_propTypes2.default.any),
-    getRowKey: _propTypes2.default.func.isRequired,
-    placeholder: _propTypes2.default.string,
-    disabledCellChecker: _propTypes2.default.func,
-    focusedCell: _propTypes2.default.shape({
-        x: _propTypes2.default.number.isRequired,
-        y: _propTypes2.default.number.isRequired
-    }),
-    onCellClick: _propTypes2.default.func,
-    blurCurrentFocus: _propTypes2.default.bool,
-
-    // scroll
-    headerHeight: _propTypes2.default.number,
-    rowHeight: _propTypes2.default.number,
-    first: _propTypes2.default.number,
-    last: _propTypes2.default.number,
-    offset: _propTypes2.default.number,
-
-    // resize
-    isColumnsResizable: _propTypes2.default.bool,
-    onColumnResize: _propTypes2.default.func,
-    columnWidthValues: _propTypes2.default.object
-};
+SpreadsheetGrid.propTypes = Object.assign({}, _tablePropTypes2.default, {
+    first: _propTypes2.default.number.isRequired,
+    last: _propTypes2.default.number.isRequired,
+    offset: _propTypes2.default.number.isRequired
+});
 
 SpreadsheetGrid.defaultProps = {
     blurCurrentFocus: false
 };
 
-SpreadsheetGrid.propTypes = propTypes;
-
 exports.default = SpreadsheetGrid;
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, module) {/**
@@ -8178,7 +8251,7 @@ module.exports = findIndex;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4), __webpack_require__(5)(module)))
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports) {
 
 /**
@@ -8646,7 +8719,7 @@ module.exports = slice;
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8658,11 +8731,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(0);
+var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(1);
+var _propTypes = __webpack_require__(0);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
@@ -8670,7 +8743,7 @@ var _lodash = __webpack_require__(7);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _cell = __webpack_require__(16);
+var _cell = __webpack_require__(17);
 
 var _cell2 = _interopRequireDefault(_cell);
 
@@ -8697,7 +8770,7 @@ var SpreadsheetRow = function (_React$Component) {
             var currentActiveCell = this.props.activeCell || this.props.focusedCell;
             var nextActiveCell = nextProps.activeCell || nextProps.focusedCell;
 
-            return this.props.x !== nextProps.x || currentActiveCell && currentActiveCell.x === this.props.x || nextActiveCell && nextActiveCell.x === this.props.x || this.props.disabledCells !== nextProps.disabledCells || this.props.columnWidthValues !== nextProps.columnWidthValues;
+            return this.props.row !== nextProps.row || this.props.x !== nextProps.x || currentActiveCell && currentActiveCell.x === this.props.x || nextActiveCell && nextActiveCell.x === this.props.x || this.props.disabledCells !== nextProps.disabledCells || this.props.columnWidthValues !== nextProps.columnWidthValues;
         }
     }, {
         key: 'render',
@@ -8733,6 +8806,7 @@ var SpreadsheetRow = function (_React$Component) {
                             x: x,
                             y: y,
                             key: y,
+                            row: row,
                             className: getCellClassName(column, row, x, y),
                             onClick: !disabled ? onCellClick.bind(_this2, x, y, row, column.id) : null,
                             onDoubleClick: !disabled ? onCellDoubleClick.bind(_this2, x, y) : null,
@@ -8759,7 +8833,7 @@ var SpreadsheetRow = function (_React$Component) {
 SpreadsheetRow.propTypes = {
     x: _propTypes2.default.number.isRequired,
     columns: _propTypes2.default.array.isRequired,
-    row: _propTypes2.default.object.isRequired,
+    row: _propTypes2.default.any.isRequired,
     onCellClick: _propTypes2.default.func,
     onCellDoubleClick: _propTypes2.default.func,
     activeCell: _propTypes2.default.object,
@@ -8773,7 +8847,7 @@ SpreadsheetRow.propTypes = {
 exports.default = SpreadsheetRow;
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8785,11 +8859,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(0);
+var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(1);
+var _propTypes = __webpack_require__(0);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
@@ -8813,7 +8887,7 @@ var SpreadsheetCell = function (_React$Component) {
     _createClass(SpreadsheetCell, [{
         key: 'shouldComponentUpdate',
         value: function shouldComponentUpdate(nextProps) {
-            return this.props.isActive !== nextProps.isActive || this.props.isFocused !== nextProps.isFocused || this.props.x !== nextProps.x || this.props.disabledCells !== nextProps.disabledCells || this.props.width !== nextProps.width;
+            return this.props.row !== nextProps.row || this.props.isActive !== nextProps.isActive || this.props.isFocused !== nextProps.isFocused || this.props.x !== nextProps.x || this.props.disabledCells !== nextProps.disabledCells || this.props.width !== nextProps.width;
         }
     }, {
         key: 'render',
@@ -8851,6 +8925,7 @@ var SpreadsheetCell = function (_React$Component) {
 SpreadsheetCell.propTypes = {
     x: _propTypes2.default.number.isRequired,
     y: _propTypes2.default.number.isRequired,
+    row: _propTypes2.default.any.isRequired,
     children: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.string, _propTypes2.default.element, _propTypes2.default.arrayOf(_propTypes2.default.element)]).isRequired,
     isActive: _propTypes2.default.bool,
     isFocused: _propTypes2.default.bool,
@@ -8865,13 +8940,13 @@ SpreadsheetCell.propTypes = {
 exports.default = SpreadsheetCell;
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(18);
+var content = __webpack_require__(19);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -8896,7 +8971,7 @@ if(false) {
 }
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(2)(undefined);
@@ -8904,13 +8979,13 @@ exports = module.exports = __webpack_require__(2)(undefined);
 
 
 // module
-exports.push([module.i, ".SpreadsheetGrid {\n    width: 100%;\n    border-collapse: collapse;\n    position: absolute;\n    top: 0;\n    background-color: #827789;\n    -webkit-box-sizing: border-box;\n            box-sizing: border-box;\n}\n\n.SpreadsheetGrid__header {\n    white-space: nowrap;\n    border-left: 1px solid rgba(37, 33, 40, 0.12);\n    border-right: 1px solid rgba(37, 33, 40, 0.12);\n}\n\n.SpreadsheetGrid__headCell {\n    display: -webkit-inline-box;\n    display: -webkit-inline-flex;\n    display: -ms-inline-flexbox;\n    display: inline-flex;\n    position: relative;\n    color: white;\n    font-size: 12px;\n    line-height: 14px;\n    font-weight: 500;\n    white-space: nowrap;\n    border-bottom: none;\n    padding: 10px 8px 8px 8px;\n    text-align: left;\n    background-color: #827789;\n    -webkit-box-align: center;\n    -webkit-align-items: center;\n        -ms-flex-align: center;\n            align-items: center;\n}\n\n.SpreadsheetGrid__headCell:first-child {\n    border-left: 1px solid rgba(37, 33, 40, 0.12);\n}\n\n.SpreadsheetGrid__headCell:not(last-child) {\n    border-right: 1px solid rgba(37, 33, 40, 0.12);\n}\n\n.SpreadsheetGrid__row {\n    background-color: white;\n    border-bottom: 1px solid #E6E1E8;\n    border-left: 1px solid #E6E1E8;\n    border-right: 1px solid #E6E1E8;\n    -webkit-user-select: none;\n       -moz-user-select: none;\n        -ms-user-select: none;\n            user-select: none;\n    white-space: nowrap;\n}\n\n.SpreadsheetGrid__cell {\n    display: inline-block;\n    position: relative;\n    color: #565059;\n    cursor: pointer;\n    border-top: none;\n    vertical-align: middle;\n    white-space: normal;\n    font-size: 13px;\n    line-height: 15px;\n    text-overflow: ellipsis;\n    padding: 10px;\n}\n\n.SpreadsheetGrid__cell > * {\n    pointer-events: none;\n}\n\n.SpreadsheetGrid__cell:not(:last-child) {\n    border-right: 1px solid #E6E1E8;\n}\n\n.SpreadsheetGrid__cell:last-child {\n    text-align: right;\n}\n\n.SpreadsheetGrid__cell_active {\n    -webkit-box-shadow: inset 0 0 0 2px #ff7a00;\n            box-shadow: inset 0 0 0 2px #ff7a00;\n    z-index: 2;\n}\n\n.SpreadsheetGrid__cell_focused > * {\n    pointer-events: auto;\n    position: relative;\n}\n\n.SpreadsheetGrid__cell_focused::after {\n    content: \"\";\n    position: absolute;\n    bottom: 0;\n    left: 0;\n    width: 100%;\n    height: 1px;\n    -webkit-box-shadow: 0 2px 5px rgba(0,0,0,0.4);\n            box-shadow: 0 2px 5px rgba(0,0,0,0.4);\n}\n\n.SpreadsheetGrid__cell_disabled {\n    cursor: default;\n    background: rgba(239, 236, 236, 0.67);\n}\n\n.SpreadsheetGrid__cell_disabled > * {\n    opacity: 0.4;\n}\n\n.SpreadsheetGrid__placeholder {\n    text-align: center;\n}\n\n.SpreadsheetGrid__resizer {\n    width: 20px;\n    position: absolute;\n    top: 0;\n    right: -10px;\n    cursor: col-resize;\n    z-index: 2;\n}", ""]);
+exports.push([module.i, ".SpreadsheetGrid {\n    width: 100%;\n    border-collapse: collapse;\n    position: absolute;\n    top: 0;\n    background-color: #827789;\n    -webkit-box-sizing: border-box;\n            box-sizing: border-box;\n}\n\n.SpreadsheetGrid__header {\n    display: -webkit-box;\n    display: -webkit-flex;\n    display: -ms-flexbox;\n    display: flex;\n    white-space: nowrap;\n}\n\n.SpreadsheetGrid__headCell {\n    display: -webkit-inline-box;\n    display: -webkit-inline-flex;\n    display: -ms-inline-flexbox;\n    display: inline-flex;\n    position: relative;\n    color: white;\n    font-size: 12px;\n    line-height: 14px;\n    font-weight: 500;\n    white-space: nowrap;\n    border-bottom: none;\n    padding: 10px 8px 8px 8px;\n    text-align: left;\n    background-color: #827789;\n    -webkit-box-align: center;\n    -webkit-align-items: center;\n        -ms-flex-align: center;\n            align-items: center;\n    border-bottom: 1px solid rgba(37, 33, 40, 0.12);\n}\n\n.SpreadsheetGrid__headCell:first-child {\n    border-left: 1px solid rgba(37, 33, 40, 0.12);\n}\n\n.SpreadsheetGrid__headCell {\n    border-right: 1px solid rgba(37, 33, 40, 0.12);\n}\n\n.SpreadsheetGrid__row {\n    background-color: white;\n    border-bottom: 1px solid #E6E1E8;\n    -webkit-user-select: none;\n       -moz-user-select: none;\n        -ms-user-select: none;\n            user-select: none;\n    white-space: nowrap;\n}\n\n.SpreadsheetGrid__cell {\n    display: -webkit-inline-box;\n    display: -webkit-inline-flex;\n    display: -ms-inline-flexbox;\n    display: inline-flex;\n    -webkit-box-align: center;\n    -webkit-align-items: center;\n        -ms-flex-align: center;\n            align-items: center;\n    position: relative;\n    color: #565059;\n    cursor: pointer;\n    border-top: none;\n    vertical-align: middle;\n    white-space: normal;\n    font-size: 13px;\n    line-height: 15px;\n    text-overflow: ellipsis;\n    padding: 10px;\n}\n\n.SpreadsheetGrid__cell > * {\n    pointer-events: none;\n}\n\n.SpreadsheetGrid__cell:first-child {\n    border-left: 1px solid #E6E1E8;\n}\n\n.SpreadsheetGrid__cell {\n    border-right: 1px solid #E6E1E8;\n}\n\n.SpreadsheetGrid__cell:last-child {\n    text-align: right;\n}\n\n.SpreadsheetGrid__cell_active {\n    -webkit-box-shadow: inset 0 0 0 2px #ff7a00;\n            box-shadow: inset 0 0 0 2px #ff7a00;\n    z-index: 2;\n}\n\n.SpreadsheetGrid__cell_focused > * {\n    pointer-events: auto;\n    position: relative;\n}\n\n.SpreadsheetGrid__cell_focused::after {\n    content: \"\";\n    position: absolute;\n    bottom: 0;\n    left: 0;\n    width: 100%;\n    height: 1px;\n    -webkit-box-shadow: 0 2px 5px rgba(0,0,0,0.4);\n            box-shadow: 0 2px 5px rgba(0,0,0,0.4);\n}\n\n.SpreadsheetGrid__cell_disabled {\n    cursor: default;\n    background: rgba(239, 236, 236, 0.67);\n}\n\n.SpreadsheetGrid__cell_disabled > * {\n    opacity: 0.4;\n}\n\n.SpreadsheetGrid__placeholder {\n    text-align: center;\n}\n\n.SpreadsheetGrid__resizer {\n    width: 20px;\n    position: absolute;\n    top: 0;\n    right: -10px;\n    cursor: col-resize;\n    z-index: 2;\n}", ""]);
 
 // exports
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports) {
 
 
@@ -9005,7 +9080,7 @@ module.exports = function (css) {
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9017,15 +9092,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(0);
+var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(1);
+var _propTypes = __webpack_require__(0);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
-var _styles = __webpack_require__(21);
+var _styles = __webpack_require__(22);
 
 var _styles2 = _interopRequireDefault(_styles);
 
@@ -9092,13 +9167,13 @@ SpreadsheetGridScrollDummy.propTypes = {
 exports.default = SpreadsheetGridScrollDummy;
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(22);
+var content = __webpack_require__(23);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -9123,7 +9198,7 @@ if(false) {
 }
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(2)(undefined);
@@ -9137,7 +9212,7 @@ exports.push([module.i, ".SpreadsheetGridScrollDummy {\n    position: relative;\
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9165,13 +9240,13 @@ exports.default = function (fn) {
 };
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(25);
+var content = __webpack_require__(26);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -9196,7 +9271,7 @@ if(false) {
 }
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(2)(undefined);
@@ -9204,13 +9279,13 @@ exports = module.exports = __webpack_require__(2)(undefined);
 
 
 // module
-exports.push([module.i, ".SpreadsheetGridContainer {\n    position: relative;\n    height: 100%;\n}\n\n.SpreadsheetGridContainer div,\n.SpreadsheetGridContainer input {\n    -webkit-box-sizing: border-box;\n            box-sizing: border-box;\n}\n\n.SpreadsheetGridScrollWrapper {\n    position: relative;\n    overflow-x: hidden;\n    overflow-y: auto;\n    -webkit-transition: height 0.3s;\n    transition: height 0.3s;\n    border-top: 1px solid #E6E1E8;\n    border-bottom: 1px solid #E6E1E8;\n}", ""]);
+exports.push([module.i, ".SpreadsheetGridContainer {\n    position: relative;\n    height: 100%;\n}\n\n.SpreadsheetGridContainer div,\n.SpreadsheetGridContainer input {\n    -webkit-box-sizing: border-box;\n            box-sizing: border-box;\n}\n\n.SpreadsheetGridScrollWrapper {\n    position: relative;\n    overflow-x: hidden;\n    overflow-y: auto;\n    -webkit-transition: height 0.3s;\n    transition: height 0.3s;\n    border-bottom: 1px solid #E6E1E8;\n}", ""]);
 
 // exports
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9222,15 +9297,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(0);
+var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(1);
+var _propTypes = __webpack_require__(0);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
-var _styles = __webpack_require__(27);
+var _styles = __webpack_require__(28);
 
 var _styles2 = _interopRequireDefault(_styles);
 
@@ -9346,13 +9421,13 @@ SpreadsheetGridInput.defaultProps = {
 exports.default = SpreadsheetGridInput;
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(28);
+var content = __webpack_require__(29);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -9377,7 +9452,7 @@ if(false) {
 }
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(2)(undefined);
@@ -9391,7 +9466,7 @@ exports.push([module.i, ".SpreadsheetGridInput {\n    height: 100%;\n    width: 
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9403,15 +9478,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(0);
+var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(1);
+var _propTypes = __webpack_require__(0);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
-var _dropdown = __webpack_require__(30);
+var _dropdown = __webpack_require__(31);
 
 var _dropdown2 = _interopRequireDefault(_dropdown);
 
@@ -9423,7 +9498,7 @@ var _lodash = __webpack_require__(6);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _styles = __webpack_require__(34);
+var _styles = __webpack_require__(35);
 
 var _styles2 = _interopRequireDefault(_styles);
 
@@ -9657,7 +9732,7 @@ SpreadsheetGridSelect.defaultProps = {
 exports.default = SpreadsheetGridSelect;
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9669,17 +9744,17 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(0);
+var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactDom = __webpack_require__(31);
+var _reactDom = __webpack_require__(32);
 
-var _propTypes = __webpack_require__(1);
+var _propTypes = __webpack_require__(0);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
-var _styles = __webpack_require__(32);
+var _styles = __webpack_require__(33);
 
 var _styles2 = _interopRequireDefault(_styles);
 
@@ -9806,19 +9881,19 @@ SpreadsheetGridDropdown.defaultProps = {
 exports.default = SpreadsheetGridDropdown;
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports) {
 
 module.exports = require("react-dom");
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(33);
+var content = __webpack_require__(34);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -9843,7 +9918,7 @@ if(false) {
 }
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(2)(undefined);
@@ -9857,13 +9932,13 @@ exports.push([module.i, ".SpreadsheetGridDropdown {\n  display: inline-block;\n 
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(35);
+var content = __webpack_require__(36);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -9888,7 +9963,7 @@ if(false) {
 }
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(2)(undefined);
