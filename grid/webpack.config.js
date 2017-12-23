@@ -68,7 +68,7 @@ if (environment === 'DEV') {
     });
 }
 
-if (environment === 'PROD') {
+if (environment === 'production') {
     Object.assign(config, {
         plugins: [
             new webpack.optimize.UglifyJsPlugin({

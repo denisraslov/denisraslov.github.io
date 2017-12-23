@@ -9,7 +9,7 @@
   },
   "scripts": {
     "watch": "webpack-dev-server --port 5050 --hot --progress --colors",
-    "build": "NODE_ENV='PROD' webpack"
+    "build": "NODE_ENV='production' webpack"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.6",
