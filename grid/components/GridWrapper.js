@@ -59,7 +59,15 @@ class GridWrapper extends React.PureComponent {
         super(props);
 
         this.state = {
-            rows: usersData.results
+            rows: usersData.results,
+            columns: this.initColumns(),
+            columnWidthValues: {
+                photo: 6,
+                position: 15,
+                registered: 9,
+                contract: 10,
+                location: 25
+            }
         };
     }
 
@@ -77,6 +85,119 @@ class GridWrapper extends React.PureComponent {
         });
     }
 
+    initColumns() {
+        return [
+            {
+                title: 'Photo',
+                value: (row, {focus}) => {
+                    return (
+                        <img
+                            src={row.picture.thumbnail}
+                        />
+                    );
+                },
+                id: 'photo',
+                getCellClassName: () => "Grid__photoCell"
+            },
+            {
+                title: 'First name',
+                value: (row, {focus}) => {
+                    return (
+                        <Input
+                            value={row.name.first}
+                            focus={focus}
+                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'name.first')}
+                        />
+                    );
+                },
+                id: 'name.first'
+            },
+            {
+                title: 'Last name',
+                value: (row, {focus}) => {
+                    return (
+                        <Input
+                            value={row.name.last}
+                            focus={focus}
+                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'name.last')}
+                        />
+                    );
+                },
+                id: 'name.last'
+            },
+            {
+                title: 'Username',
+                value: (row, {focus}) => {
+                    return (
+                        <Input
+                            value={row.login.username}
+                            focus={focus}
+                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'login.username')}
+                        />
+                    );
+                },
+                id: 'login.username'
+            },
+            {
+                title: 'Position',
+                value: (row, {focus}) => {
+                    return (
+                        <Select
+                            items={positions}
+                            selectedId={row.positionId}
+                            isOpen={focus}
+                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'positionId')}
+                        />
+                    );
+                },
+                id: 'position'
+            },
+            {
+                title: 'Registered',
+                value: (row, {focus}) => {
+                    return (
+                        <Input
+                            value={row.registered.split(' ')[0]}
+                            focus={focus}
+                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'registered')}
+                        />
+                    );
+                },
+                id: 'registered'
+            },
+            {
+                title: 'Contract',
+                value: (row, {focus}) => {
+                    return (
+                        <Select
+                            items={contractTypes}
+                            selectedId={row.contractTypeId}
+                            isOpen={focus}
+                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'contractTypeId')}
+                        />
+                    );
+                },
+                id: 'contract'
+            },
+            {
+                title: 'Location',
+                value: (row, {focus}) => {
+                    return (
+                        <Input
+                            value={row.location.postcode + ', ' +
+                            row.location.city + ', ' +
+                            row.location.state + ', ' +
+                            row.location.street}
+                            focus={focus}
+                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'location.street')}
+                        />
+                    );
+                },
+                id: 'location'
+            }
+        ];
+    }
+
     render() {
         return (
             <div
@@ -91,116 +212,7 @@ class GridWrapper extends React.PureComponent {
                     Open source code
                 </a>
                 <Grid
-                    columns={[
-                        {
-                            title: 'Photo',
-                            value: (row, {focus}) => {
-                                return (
-                                    <img
-                                        src={row.picture.thumbnail}
-                                    />
-                                );
-                            },
-                            id: 'photo',
-                            getCellClassName: () => "Grid__photoCell"
-                        },
-                        {
-                            title: 'First name',
-                            value: (row, {focus}) => {
-                                return (
-                                    <Input
-                                        value={row.name.first}
-                                        focus={focus}
-                                        onBlur={this.onFieldChange.bind(this, getRowKey(row), 'name.first')}
-                                    />
-                                );
-                            },
-                            id: 'name.first'
-                        },
-                        {
-                            title: 'Last name',
-                            value: (row, {focus}) => {
-                                return (
-                                    <Input
-                                        value={row.name.last}
-                                        focus={focus}
-                                        onBlur={this.onFieldChange.bind(this, getRowKey(row), 'name.last')}
-                                    />
-                                );
-                            },
-                            id: 'name.last'
-                        },
-                        {
-                            title: 'Username',
-                            value: (row, {focus}) => {
-                                return (
-                                    <Input
-                                        value={row.login.username}
-                                        focus={focus}
-                                        onBlur={this.onFieldChange.bind(this, getRowKey(row), 'login.username')}
-                                    />
-                                );
-                            },
-                            id: 'login.username'
-                        },
-                        {
-                            title: 'Position',
-                            value: (row, {focus}) => {
-                                return (
-                                    <Select
-                                        items={positions}
-                                        selectedId={row.positionId}
-                                        isOpen={focus}
-                                        onChange={this.onFieldChange.bind(this, getRowKey(row), 'positionId')}
-                                    />
-                                );
-                            },
-                            id: 'position'
-                        },
-                        {
-                            title: 'Registered',
-                            value: (row, {focus}) => {
-                                return (
-                                    <Input
-                                        value={row.registered.split(' ')[0]}
-                                        focus={focus}
-                                        onBlur={this.onFieldChange.bind(this, getRowKey(row), 'registered')}
-                                    />
-                                );
-                            },
-                            id: 'registered'
-                        },
-                        {
-                            title: 'Contract',
-                            value: (row, {focus}) => {
-                                return (
-                                    <Select
-                                        items={contractTypes}
-                                        selectedId={row.contractTypeId}
-                                        isOpen={focus}
-                                        onChange={this.onFieldChange.bind(this, getRowKey(row), 'contractTypeId')}
-                                    />
-                                );
-                            },
-                            id: 'contract'
-                        },
-                        {
-                            title: 'Location',
-                            value: (row, {focus}) => {
-                                return (
-                                    <Input
-                                        value={row.location.postcode + ', ' +
-                                            row.location.city + ', ' +
-                                            row.location.state + ', ' +
-                                            row.location.street}
-                                        focus={focus}
-                                        onBlur={this.onFieldChange.bind(this, getRowKey(row), 'location.street')}
-                                    />
-                                );
-                            },
-                            id: 'location'
-                        }
-                    ]}
+                    columns={this.state.columns}
                     rows={this.state.rows}
                     blurCurrentFocus={this.state.blurCurrentFocus}
                     getRowKey={row => getRowKey(row)}
@@ -211,13 +223,7 @@ class GridWrapper extends React.PureComponent {
                             columnId === 'registered';
                     }}
                     isColumnsResizable
-                    columnWidthValues={{
-                        photo: 6,
-                        position: 15,
-                        registered: 9,
-                        contract: 10,
-                        location: 25
-                    }}
+                    columnWidthValues={this.state.columnWidthValues}
                 />
             </div>
         );
