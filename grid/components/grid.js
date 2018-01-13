@@ -5106,7 +5106,11 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
         value: function componentWillReceiveProps(newProps) {
             if (newProps.resetScroll) {
                 this.scrollWrapperElement.scrollTop = 0;
-                this.calculateScrollState();
+                this.calculateScrollState(newProps.rows);
+                return;
+            }
+            if (newProps.rows !== this.props.rows) {
+                this.calculateScrollState(newProps.rows);
             }
         }
     }, {
@@ -5292,11 +5296,17 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
         }
     }, {
         key: 'calculateScrollState',
-        value: function calculateScrollState() {
+        value: function calculateScrollState(newRows) {
             var scrollWrapperElement = this.scrollWrapperElement;
+            var rows = newRows || this.props.rows;
+
+            if (!this.props.isScrollable) {
+                return;
+            }
+
             var scrollTop = Math.max(scrollWrapperElement.scrollTop, 0);
             var first = Math.max(0, Math.floor(scrollTop / this.props.rowHeight) - RESERVE_ROWS_COUNT);
-            var last = Math.min(this.props.rows.length, this.calculateLast(first) + RESERVE_ROWS_COUNT);
+            var last = Math.min(rows.length, this.calculateLast(first) + RESERVE_ROWS_COUNT);
 
             if (first !== this.state.first || last !== this.state.last) {
                 this.setState({
@@ -5337,6 +5347,31 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
             }
         }
     }, {
+        key: 'getDisabledCells',
+        value: function getDisabledCells(rows, startIndex) {
+            var _this5 = this;
+
+            var disabledCells = [];
+            var disabledCellChecker = this.props.disabledCellChecker;
+
+            if (disabledCellChecker) {
+                rows.forEach(function (row, x) {
+                    _this5.props.columns.forEach(function (column, y) {
+                        if (disabledCellChecker(row, column.id)) {
+                            disabledCells.push({ x: startIndex + x, y: y });
+                        }
+                    });
+                });
+            }
+
+            return disabledCells;
+        }
+    }, {
+        key: 'getScrollWrapperClassName',
+        value: function getScrollWrapperClassName() {
+            return 'SpreadsheetGridScrollWrapper' + (this.props.isScrollable ? ' SpreadsheetGridScrollWrapper_scrollable' : '');
+        }
+    }, {
         key: 'renderResizer',
         value: function renderResizer() {
             return _react2.default.createElement('div', {
@@ -5350,7 +5385,7 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
     }, {
         key: 'renderHeader',
         value: function renderHeader() {
-            var _this5 = this;
+            var _this6 = this;
 
             var columns = this.props.columns;
             var columnWidthValues = this.state.columnWidthValues;
@@ -5370,25 +5405,20 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
                             className: 'SpreadsheetGrid__headCell',
                             'data-index': i,
                             style: {
-                                height: _this5.props.headerHeight + 'px',
+                                height: _this6.props.headerHeight + 'px',
                                 width: columnWidthValues ? columnWidthValues[columns[i].id] + '%' : 'auto'
                             }
                         },
                         typeof column.title === 'string' ? column.title : column.title(),
-                        _this5.props.isColumnsResizable && i !== columns.length - 1 && _this5.renderResizer()
+                        _this6.props.isColumnsResizable && i !== columns.length - 1 && _this6.renderResizer()
                     );
                 })
             );
         }
     }, {
-        key: 'getScrollWrapperClassName',
-        value: function getScrollWrapperClassName() {
-            return 'SpreadsheetGridScrollWrapper' + (this.props.isScrollable ? ' SpreadsheetGridScrollWrapper_scrollable' : '');
-        }
-    }, {
         key: 'render',
         value: function render() {
-            var _this6 = this;
+            var _this7 = this;
 
             var rows = (0, _lodash2.default)(this.props.rows, this.state.first, this.state.last);
 
@@ -5397,7 +5427,7 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
                 {
                     className: 'SpreadsheetGridContainer',
                     ref: function ref(tableElement) {
-                        _this6.tableElement = tableElement;
+                        _this7.tableElement = tableElement;
                     }
                 },
                 this.renderHeader(),
@@ -5407,10 +5437,10 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
                         className: this.getScrollWrapperClassName(),
                         onScroll: this.onScroll,
                         ref: function ref(node) {
-                            return _this6.scrollWrapperElement = node;
+                            return _this7.scrollWrapperElement = node;
                         },
                         style: {
-                            height: 'calc(100% - ' + this.props.headerHeight + 'px)'
+                            height: this.props.isScrollable ? 'calc(100% - ' + this.props.headerHeight + 'px)' : 'auto'
                         }
                     },
                     _react2.default.createElement(_scrollDummy2.default, {
@@ -5418,7 +5448,7 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
                         headerHeight: this.props.headerHeight,
                         rowHeight: this.props.rowHeight,
                         refEl: function refEl(el) {
-                            return _this6.scrollDummyEl = el;
+                            return _this7.scrollDummyEl = el;
                         }
                     }),
                     _react2.default.createElement(_grid2.default, _extends({}, this.props, {
@@ -5426,7 +5456,8 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
                         rowsCount: this.props.rows.length,
                         startIndex: this.state.first,
                         offset: this.state.offset,
-                        columnWidthValues: this.state.columnWidthValues
+                        columnWidthValues: this.state.columnWidthValues,
+                        disabledCells: this.getDisabledCells(rows, this.state.first)
                     }))
                 )
             );
@@ -5524,9 +5555,7 @@ var SpreadsheetGrid = function (_React$PureComponent) {
         _this.onCellDoubleClick = _this.onCellDoubleClick.bind(_this);
         _this.getCellClassName = _this.getCellClassName.bind(_this);
 
-        _this.state = {
-            disabledCells: _this.getDisabledCells(_this.props.rows, _this.props.disabledCellChecker)
-        };
+        _this.state = {};
 
         if (_this.props.focusedCell) {
             _this.state.activeCell = _this.props.focusedCell;
@@ -5546,24 +5575,16 @@ var SpreadsheetGrid = function (_React$PureComponent) {
     }, {
         key: 'componentWillReceiveProps',
         value: function componentWillReceiveProps(newProps) {
-            if (this.props.rows !== newProps.rows && newProps.disabledCellChecker) {
-                var disabledCells = this.getDisabledCells(newProps.rows, newProps.disabledCellChecker);
+            var disabledCells = this.props.disabledCells;
+            var newState = {};
 
-                console.log(disabledCells);
-
-                var newState = {
-                    disabledCells: disabledCells
-                };
-
-                if ((0, _lodash2.default)(disabledCells, this.state.activeCell)) {
-                    newState.activeCell = null;
-                }
-                if ((0, _lodash2.default)(disabledCells, this.state.focusedCell)) {
-                    newState.focusedCell = null;
-                }
-
-                this.setState(newState);
+            if ((0, _lodash2.default)(disabledCells, this.state.activeCell)) {
+                newState.activeCell = null;
             }
+            if ((0, _lodash2.default)(disabledCells, this.state.focusedCell)) {
+                newState.focusedCell = null;
+            }
+            this.setState(newState);
 
             if (newProps.focusedCell) {
                 var newActiveCell = newProps.focusedCell;
@@ -5594,26 +5615,6 @@ var SpreadsheetGrid = function (_React$PureComponent) {
             document.removeEventListener('click', this.onGlobalClick, false);
         }
     }, {
-        key: 'getDisabledCells',
-        value: function getDisabledCells(rows, disabledCellChecker) {
-            var _this2 = this;
-
-            var disabledCells = [];
-            var startIndex = this.props.startIndex;
-
-            if (disabledCellChecker) {
-                rows.forEach(function (row, x) {
-                    _this2.props.columns.forEach(function (column, y) {
-                        if (disabledCellChecker(row, column.id)) {
-                            disabledCells.push({ x: startIndex + x, y: y });
-                        }
-                    });
-                });
-            }
-
-            return disabledCells;
-        }
-    }, {
         key: 'onGlobalKeyDown',
         value: function onGlobalKeyDown(e) {
             var block = this;
@@ -5635,7 +5636,7 @@ var SpreadsheetGrid = function (_React$PureComponent) {
                     }
                     newFocusedCell = null;
 
-                    if ((0, _lodash2.default)(block.state.disabledCells, newActiveCell)) {
+                    if ((0, _lodash2.default)(block.props.disabledCells, newActiveCell)) {
                         _moveRight(newActiveCell);
                     }
                 };
@@ -5649,7 +5650,7 @@ var SpreadsheetGrid = function (_React$PureComponent) {
                     }
                     newFocusedCell = null;
 
-                    if ((0, _lodash2.default)(block.state.disabledCells, newActiveCell)) {
+                    if ((0, _lodash2.default)(block.props.disabledCells, newActiveCell)) {
                         _moveDown(newActiveCell);
                     }
                 };
@@ -5663,7 +5664,7 @@ var SpreadsheetGrid = function (_React$PureComponent) {
                     }
                     newFocusedCell = null;
 
-                    if ((0, _lodash2.default)(block.state.disabledCells, newActiveCell)) {
+                    if ((0, _lodash2.default)(block.props.disabledCells, newActiveCell)) {
                         _moveUp(newActiveCell);
                     }
                 };
@@ -5679,7 +5680,7 @@ var SpreadsheetGrid = function (_React$PureComponent) {
                     }
                     newFocusedCell = null;
 
-                    if ((0, _lodash2.default)(block.state.disabledCells, newActiveCell)) {
+                    if ((0, _lodash2.default)(block.props.disabledCells, newActiveCell)) {
                         _moveLeft(newActiveCell);
                     }
                 };
@@ -5764,7 +5765,7 @@ var SpreadsheetGrid = function (_React$PureComponent) {
     }, {
         key: 'onCellClick',
         value: function onCellClick(x, y, row, columnId, e) {
-            if (!(0, _lodash2.default)(this.state.disabledCells, { x: x, y: y })) {
+            if (!(0, _lodash2.default)(this.props.disabledCells, { x: x, y: y })) {
                 if (!e.skipCellClick && !(0, _lodash4.default)(this.state.focusedCell, { x: x, y: y })) {
                     this.setState({
                         focusedCell: e.target !== e.currentTarget ? { x: x, y: y } : null,
@@ -5782,7 +5783,7 @@ var SpreadsheetGrid = function (_React$PureComponent) {
     }, {
         key: 'onCellDoubleClick',
         value: function onCellDoubleClick(x, y) {
-            if (!(0, _lodash2.default)(this.state.disabledCells, { x: x, y: y })) {
+            if (!(0, _lodash2.default)(this.props.disabledCells, { x: x, y: y })) {
                 this.setState({
                     activeCell: { x: x, y: y },
                     focusedCell: { x: x, y: y }
@@ -5792,7 +5793,7 @@ var SpreadsheetGrid = function (_React$PureComponent) {
     }, {
         key: 'getCellClassName',
         value: function getCellClassName(column, row, x, y) {
-            return 'SpreadsheetGrid__cell' + ((0, _lodash4.default)(this.state.activeCell, { x: x, y: y }) ? ' SpreadsheetGrid__cell_active' : '') + ((0, _lodash4.default)(this.state.focusedCell, { x: x, y: y }) ? ' SpreadsheetGrid__cell_focused' : '') + ((0, _lodash2.default)(this.state.disabledCells, { x: x, y: y }) ? ' SpreadsheetGrid__cell_disabled' : '') + (column.getCellClassName ? ' ' + column.getCellClassName(row) : '');
+            return 'SpreadsheetGrid__cell' + ((0, _lodash4.default)(this.state.activeCell, { x: x, y: y }) ? ' SpreadsheetGrid__cell_active' : '') + ((0, _lodash4.default)(this.state.focusedCell, { x: x, y: y }) ? ' SpreadsheetGrid__cell_focused' : '') + ((0, _lodash2.default)(this.props.disabledCells, { x: x, y: y }) ? ' SpreadsheetGrid__cell_disabled' : '') + (column.getCellClassName ? ' ' + column.getCellClassName(row) : '');
         }
     }, {
         key: 'calculatePosition',
@@ -5802,7 +5803,7 @@ var SpreadsheetGrid = function (_React$PureComponent) {
     }, {
         key: 'renderBody',
         value: function renderBody() {
-            var _this3 = this;
+            var _this2 = this;
 
             var _props = this.props,
                 rows = _props.rows,
@@ -5816,17 +5817,17 @@ var SpreadsheetGrid = function (_React$PureComponent) {
                 body = rows.map(function (row, i) {
                     return _react2.default.createElement(_row2.default, {
                         x: startIndex + i,
-                        key: _this3.props.getRowKey(row),
+                        key: _this2.props.getRowKey(row),
                         columns: columns,
                         row: row,
-                        getCellClassName: _this3.getCellClassName,
-                        onCellClick: _this3.onCellClick,
-                        onCellDoubleClick: _this3.onCellDoubleClick,
-                        activeCell: _this3.state.activeCell,
-                        focusedCell: _this3.state.focusedCell,
-                        disabledCells: _this3.state.disabledCells,
-                        height: _this3.props.rowHeight,
-                        columnWidthValues: _this3.props.columnWidthValues
+                        getCellClassName: _this2.getCellClassName,
+                        onCellClick: _this2.onCellClick,
+                        onCellDoubleClick: _this2.onCellDoubleClick,
+                        activeCell: _this2.state.activeCell,
+                        focusedCell: _this2.state.focusedCell,
+                        disabledCells: _this2.props.disabledCells,
+                        height: _this2.props.rowHeight,
+                        columnWidthValues: _this2.props.columnWidthValues
                     });
                 });
             } else {
@@ -5847,7 +5848,7 @@ var SpreadsheetGrid = function (_React$PureComponent) {
                 {
                     className: 'SpreadsheetGrid',
                     style: {
-                        top: this.calculatePosition()
+                        transform: 'translate3d(0, ' + this.calculatePosition() + ', 0)'
                     }
                 },
                 this.renderBody()
@@ -5861,7 +5862,11 @@ var SpreadsheetGrid = function (_React$PureComponent) {
 SpreadsheetGrid.propTypes = Object.assign({}, _tablePropTypes2.default, {
     offset: _propTypes2.default.number.isRequired,
     startIndex: _propTypes2.default.number.isRequired,
-    rowsCount: _propTypes2.default.number.isRequired
+    rowsCount: _propTypes2.default.number.isRequired,
+    disabledCells: _propTypes2.default.arrayOf(_propTypes2.default.shape({
+        x: _propTypes2.default.number,
+        y: _propTypes2.default.number
+    })).isRequired
 });
 
 SpreadsheetGrid.defaultProps = {
@@ -6092,7 +6097,7 @@ exports = module.exports = __webpack_require__(2)(undefined);
 
 
 // module
-exports.push([module.i, ".SpreadsheetGrid {\n    width: 100%;\n    border-collapse: collapse;\n    position: absolute;\n    top: 0;\n    background-color: #827789;\n    -webkit-box-sizing: border-box;\n            box-sizing: border-box;\n}\n\n.SpreadsheetGrid__header {\n    display: -webkit-box;\n    display: -webkit-flex;\n    display: -ms-flexbox;\n    display: flex;\n    white-space: nowrap;\n}\n\n.SpreadsheetGrid__headCell {\n    display: -webkit-inline-box;\n    display: -webkit-inline-flex;\n    display: -ms-inline-flexbox;\n    display: inline-flex;\n    position: relative;\n    color: white;\n    font-size: 12px;\n    line-height: 14px;\n    font-weight: 500;\n    white-space: nowrap;\n    border-bottom: none;\n    padding: 10px 8px 8px 8px;\n    text-align: left;\n    background-color: #827789;\n    -webkit-box-align: center;\n    -webkit-align-items: center;\n        -ms-flex-align: center;\n            align-items: center;\n    border-bottom: 1px solid rgba(37, 33, 40, 0.12);\n}\n\n.SpreadsheetGrid__headCell:first-child {\n    border-left: 1px solid rgba(37, 33, 40, 0.12);\n}\n\n.SpreadsheetGrid__headCell {\n    border-right: 1px solid rgba(37, 33, 40, 0.12);\n}\n\n.SpreadsheetGrid__row {\n    background-color: white;\n    border-bottom: 1px solid #E6E1E8;\n    -webkit-user-select: none;\n       -moz-user-select: none;\n        -ms-user-select: none;\n            user-select: none;\n    white-space: nowrap;\n}\n\n.SpreadsheetGrid__cell {\n    display: -webkit-inline-box;\n    display: -webkit-inline-flex;\n    display: -ms-inline-flexbox;\n    display: inline-flex;\n    -webkit-box-align: center;\n    -webkit-align-items: center;\n        -ms-flex-align: center;\n            align-items: center;\n    position: relative;\n    color: #565059;\n    cursor: pointer;\n    border-top: none;\n    vertical-align: middle;\n    white-space: normal;\n    font-size: 13px;\n    line-height: 15px;\n    text-overflow: ellipsis;\n    padding: 10px;\n    height: 100%;\n}\n\n.SpreadsheetGrid__cell > * {\n    pointer-events: none;\n}\n\n.SpreadsheetGrid__cell:first-child {\n    border-left: 1px solid #E6E1E8;\n}\n\n.SpreadsheetGrid__cell {\n    border-right: 1px solid #E6E1E8;\n}\n\n.SpreadsheetGrid__cell:last-child {\n    text-align: right;\n}\n\n.SpreadsheetGrid__cell_active {\n    -webkit-box-shadow: inset 0 0 0 2px #ff7a00;\n            box-shadow: inset 0 0 0 2px #ff7a00;\n    z-index: 2;\n}\n\n.SpreadsheetGrid__cell_focused > * {\n    pointer-events: auto;\n    position: relative;\n}\n\n.SpreadsheetGrid__cell_focused::after {\n    content: \"\";\n    position: absolute;\n    bottom: 0;\n    left: 0;\n    width: 100%;\n    height: 1px;\n    -webkit-box-shadow: 0 2px 5px rgba(0,0,0,0.4);\n            box-shadow: 0 2px 5px rgba(0,0,0,0.4);\n}\n\n.SpreadsheetGrid__cell_disabled {\n    cursor: default;\n    background: rgba(239, 236, 236, 0.3);\n}\n\n.SpreadsheetGrid__cell_disabled > * {\n    opacity: 0.4;\n}\n\n.SpreadsheetGrid__placeholder {\n    text-align: center;\n}\n\n.SpreadsheetGrid__resizer {\n    width: 20px;\n    position: absolute;\n    top: 0;\n    right: -10px;\n    cursor: col-resize;\n    z-index: 2;\n}", ""]);
+exports.push([module.i, ".SpreadsheetGrid {\n    width: 100%;\n    border-collapse: collapse;\n    position: absolute;\n    top: 0;\n    background-color: #827789;\n    -webkit-box-sizing: border-box;\n            box-sizing: border-box;\n}\n\n.SpreadsheetGrid__header {\n    display: -webkit-box;\n    display: -webkit-flex;\n    display: -ms-flexbox;\n    display: flex;\n    white-space: nowrap;\n}\n\n.SpreadsheetGrid__headCell {\n    display: -webkit-inline-box;\n    display: -webkit-inline-flex;\n    display: -ms-inline-flexbox;\n    display: inline-flex;\n    position: relative;\n    color: white;\n    font-size: 12px;\n    line-height: 14px;\n    font-weight: 500;\n    white-space: nowrap;\n    border-bottom: none;\n    padding: 10px 8px 8px 8px;\n    text-align: left;\n    background-color: #827789;\n    -webkit-box-align: center;\n    -webkit-align-items: center;\n        -ms-flex-align: center;\n            align-items: center;\n    border-bottom: 1px solid rgba(37, 33, 40, 0.12);\n}\n\n.SpreadsheetGrid__headCell:first-child {\n    border-left: 1px solid rgba(37, 33, 40, 0.12);\n}\n\n.SpreadsheetGrid__headCell {\n    border-right: 1px solid rgba(37, 33, 40, 0.12);\n}\n\n.SpreadsheetGrid__row {\n    background-color: white;\n    border-bottom: 1px solid #E6E1E8;\n    -webkit-user-select: none;\n       -moz-user-select: none;\n        -ms-user-select: none;\n            user-select: none;\n    white-space: nowrap;\n}\n\n.SpreadsheetGrid__cell {\n    display: -webkit-inline-box;\n    display: -webkit-inline-flex;\n    display: -ms-inline-flexbox;\n    display: inline-flex;\n    -webkit-box-align: center;\n    -webkit-align-items: center;\n        -ms-flex-align: center;\n            align-items: center;\n    position: relative;\n    color: #565059;\n    cursor: pointer;\n    border-top: none;\n    vertical-align: middle;\n    white-space: normal;\n    font-size: 13px;\n    line-height: 15px;\n    text-overflow: ellipsis;\n    padding: 10px;\n    height: 100%;\n}\n\n.SpreadsheetGrid__cell > * {\n    pointer-events: none;\n}\n\n.SpreadsheetGrid__cell:first-child {\n    border-left: 1px solid #E6E1E8;\n}\n\n.SpreadsheetGrid__cell {\n    border-right: 1px solid #E6E1E8;\n}\n\n.SpreadsheetGrid__cell:last-child {\n    text-align: right;\n}\n\n.SpreadsheetGrid__cell_active {\n    -webkit-box-shadow: inset 0 0 0 2px #ff7a00;\n            box-shadow: inset 0 0 0 2px #ff7a00;\n    z-index: 2;\n}\n\n.SpreadsheetGrid__cell_focused > * {\n    pointer-events: auto;\n    position: relative;\n}\n\n.SpreadsheetGrid__cell_focused::after {\n    content: \"\";\n    position: absolute;\n    bottom: 0;\n    left: 0;\n    width: 100%;\n    height: 1px;\n    -webkit-box-shadow: 0 2px 5px rgba(0,0,0,0.4);\n            box-shadow: 0 2px 5px rgba(0,0,0,0.4);\n}\n\n.SpreadsheetGrid__cell_disabled {\n    cursor: default;\n    background: rgba(239, 236, 236, 0.3);\n}\n\n.SpreadsheetGrid__cell_disabled > * {\n    opacity: 0.4;\n}\n\n.SpreadsheetGrid__placeholder {\n    text-align: center;\n    height: 53px;\n    background: #fff;\n    padding: 15px;\n}\n\n.SpreadsheetGrid__resizer {\n    width: 20px;\n    position: absolute;\n    top: 0;\n    right: -10px;\n    cursor: col-resize;\n    z-index: 2;\n}", ""]);
 
 // exports
 
