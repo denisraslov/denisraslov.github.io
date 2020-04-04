@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Grid, Input, Select } from './../../../react-spreadsheet-table';
+import React from 'react';
+import { Grid, Input, Select } from './Grid';
 import set from 'lodash.set';
 import usersData from './../users.json';
 
@@ -53,20 +53,39 @@ function getRowKey(row) {
     return row.login.sha1;
 }
 
-const GridWrapper = () => {
-    const [rows, setRows] = useState(usersData.results);
+class GridWrapper extends React.PureComponent {
 
-    const onFieldChange = (rowKey, field) => (value) => {
-        const modifiedRows = [].concat(rows);
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            rows: usersData.results,
+            columns: this.initColumns(),
+            columnWidthValues: {
+                photo: 6,
+                position: 15,
+                registered: 9,
+                contract: 10,
+                location: 25
+            }
+        };
+    }
+
+    onFieldChange(rowKey, field, value) {
+        const modifiedRows = [].concat(this.state.rows);
         const row = modifiedRows.find((row) => {
             return getRowKey(row) === rowKey;
         });
 
         set(row, field, value);
-        setRows(modifiedRows)
+
+        this.setState({
+            rows: modifiedRows,
+            blurCurrentFocus: true
+        });
     }
 
-    const initColumns = () => {
+    initColumns() {
         return [
             {
                 title: 'Photo',
@@ -78,7 +97,6 @@ const GridWrapper = () => {
                     );
                 },
                 id: 'photo',
-                width: 6,
                 getCellClassName: () => "Grid__photoCell"
             },
             {
@@ -88,7 +106,7 @@ const GridWrapper = () => {
                         <Input
                             value={row.name.first}
                             focus={focus}
-                            onChange={onFieldChange(getRowKey(row), 'name.first')}
+                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'name.first')}
                         />
                     );
                 },
@@ -101,7 +119,7 @@ const GridWrapper = () => {
                         <Input
                             value={row.name.last}
                             focus={focus}
-                            onChange={onFieldChange(getRowKey(row), 'name.last')}
+                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'name.last')}
                         />
                     );
                 },
@@ -114,7 +132,7 @@ const GridWrapper = () => {
                         <Input
                             value={row.login.username}
                             focus={focus}
-                            onChange={onFieldChange(getRowKey(row), 'login.username')}
+                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'login.username')}
                         />
                     );
                 },
@@ -128,12 +146,11 @@ const GridWrapper = () => {
                             items={positions}
                             selectedId={row.positionId}
                             isOpen={focus}
-                            onChange={onFieldChange(getRowKey(row), 'positionId')}
+                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'positionId')}
                         />
                     );
                 },
-                id: 'position',
-                width: 15,
+                id: 'position'
             },
             {
                 title: 'Registered',
@@ -142,12 +159,11 @@ const GridWrapper = () => {
                         <Input
                             value={row.registered.split(' ')[0]}
                             focus={focus}
-                            onChange={onFieldChange(getRowKey(row), 'registered')}
+                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'registered')}
                         />
                     );
                 },
-                id: 'registered',
-                width: 9,
+                id: 'registered'
             },
             {
                 title: 'Contract',
@@ -157,12 +173,11 @@ const GridWrapper = () => {
                             items={contractTypes}
                             selectedId={row.contractTypeId}
                             isOpen={focus}
-                            onChange={onFieldChange(getRowKey(row), 'contractTypeId')}
+                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'contractTypeId')}
                         />
                     );
                 },
-                id: 'contract',
-                width: 10,
+                id: 'contract'
             },
             {
                 title: 'Location',
@@ -174,52 +189,45 @@ const GridWrapper = () => {
                             row.location.state + ', ' +
                             row.location.street}
                             focus={focus}
-                            onChange={onFieldChange(getRowKey(row), 'location.street')}
+                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'location.street')}
                         />
                     );
                 },
-                id: 'location',
-                width: 25
+                id: 'location'
             }
         ];
     }
 
-    const [columns, setColumns] = useState(initColumns())
-
-    const onColumnResize = (widthValues) => {
-        const newColumns = [].concat(columns)
-        Object.keys(widthValues).forEach((columnId) => {
-            newColumns[columnId].width = widthValues[columnId]
-        })
-        setColumns(newColumns)
-    }
-
-    return (
-        <div
-            key="grid"
-            className="GridWrapper"
-        >
-            <a
-                href="https://gist.github.com/denisraslov/d65bc39514e99580b39cd99e9977caf8"
-                target="_blank"
-                className="ExampleCodeButton"
+    render() {
+        return (
+            <div
+                key="grid"
+                className="GridWrapper"
             >
-                Open source code
-            </a>
-            <Grid
-                columns={columns}
-                rows={rows}
-                getRowKey={row => getRowKey(row)}
-                rowHeight={60}
-                disabledCellChecker={(row, columnId) => {
-                    return columnId === 'photo' ||
-                        columnId === 'location' ||
-                        columnId === 'registered';
-                }}
-                isColumnsResizable
-            />
-        </div>
-    );
+                <a
+                    href="https://gist.github.com/denisraslov/d65bc39514e99580b39cd99e9977caf8"
+                    target="_blank"
+                    className="ExampleCodeButton"
+                >
+                    Open source code
+                </a>
+                <Grid
+                    columns={this.state.columns}
+                    rows={this.state.rows}
+                    blurCurrentFocus={this.state.blurCurrentFocus}
+                    getRowKey={row => getRowKey(row)}
+                    rowHeight={60}
+                    disabledCellChecker={(row, columnId) => {
+                        return columnId === 'photo' ||
+                            columnId === 'location' ||
+                            columnId === 'registered';
+                    }}
+                    isColumnsResizable
+                    columnWidthValues={this.state.columnWidthValues}
+                />
+            </div>
+        );
+    }
 }
 
 export default GridWrapper;

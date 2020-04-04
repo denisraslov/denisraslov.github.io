@@ -5072,7 +5072,6 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
         _this.processColumnResize = _this.processColumnResize.bind(_this);
 
         _this.state = {
-            blurCurrentFocus: props.blurCurrentFocus,
             first: 0,
             last: _this.calculateInitialLast(),
             offset: 0,
@@ -5105,11 +5104,6 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
     }, {
         key: 'componentWillReceiveProps',
         value: function componentWillReceiveProps(newProps) {
-            if (this.state.blurCurrentFocus !== newProps.blurCurrentFocus) {
-                this.setState({
-                    blurCurrentFocus: newProps.blurCurrentFocus
-                });
-            }
             if (newProps.resetScroll) {
                 this.scrollWrapperElement.scrollTop = 0;
                 this.calculateScrollState(newProps.rows);
@@ -5316,7 +5310,6 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
 
             if (first !== this.state.first || last !== this.state.last) {
                 this.setState({
-                    blurCurrentFocus: false,
                     first: first,
                     last: last,
                     offset: first * this.props.rowHeight,
@@ -5459,7 +5452,6 @@ var SpreadsheetGridScrollWrapper = function (_React$PureComponent) {
                         }
                     }),
                     _react2.default.createElement(_grid2.default, _extends({}, this.props, {
-                        blurCurrentFocus: this.state.blurCurrentFocus,
                         rows: rows,
                         rowsCount: this.props.rows.length,
                         startIndex: this.state.first,
@@ -5832,13 +5824,8 @@ var SpreadsheetGrid = function (_React$PureComponent) {
                         onCellClick: _this2.onCellClick,
                         onCellDoubleClick: _this2.onCellDoubleClick,
                         activeCell: _this2.state.activeCell,
-                        focusedCell: _this2.state.focusedCell
-                        // Pass disabled cells for this row only.
-                        , disabledCells: _this2.props.disabledCells.filter(function (_ref5) {
-                            var x = _ref5.x;
-
-                            return x === startIndex + i;
-                        }),
+                        focusedCell: _this2.state.focusedCell,
+                        disabledCells: _this2.props.disabledCells,
                         height: _this2.props.rowHeight,
                         columnWidthValues: _this2.props.columnWidthValues
                     });
@@ -5937,16 +5924,10 @@ var SpreadsheetRow = function (_React$Component) {
     _createClass(SpreadsheetRow, [{
         key: 'shouldComponentUpdate',
         value: function shouldComponentUpdate(nextProps) {
-            var currentActiveCell = this.props.activeCell;
-            var nextActiveCell = nextProps.activeCell;
-            var currentFocusedCell = this.props.focusedCell;
-            var nextFocusedCell = nextProps.focusedCell;
+            var currentActiveCell = this.props.activeCell || this.props.focusedCell;
+            var nextActiveCell = nextProps.activeCell || nextProps.focusedCell;
 
-            var isActiveCellChanged = currentActiveCell && !nextActiveCell || !currentActiveCell && nextActiveCell || currentActiveCell && nextActiveCell && (currentActiveCell.x !== nextActiveCell.x || currentActiveCell.y !== nextActiveCell.y);
-
-            var isFocusedCellChanged = currentFocusedCell && !nextFocusedCell || !currentFocusedCell && nextFocusedCell || currentFocusedCell && nextFocusedCell && (currentFocusedCell.x !== nextFocusedCell.x || currentFocusedCell.y !== nextFocusedCell.y);
-
-            return this.props.row !== nextProps.row || this.props.x !== nextProps.x || JSON.stringify(this.props.disabledCells) !== JSON.stringify(nextProps.disabledCells) || this.props.columns !== nextProps.columns || this.props.columnWidthValues !== nextProps.columnWidthValues || isActiveCellChanged && (currentActiveCell && currentActiveCell.x === this.props.x || nextActiveCell && nextActiveCell.x === this.props.x) || isFocusedCellChanged && (currentFocusedCell && currentFocusedCell.x === this.props.x || nextFocusedCell && nextFocusedCell.x === this.props.x);
+            return this.props.row !== nextProps.row || this.props.x !== nextProps.x || currentActiveCell && currentActiveCell.x === this.props.x || nextActiveCell && nextActiveCell.x === this.props.x || this.props.disabledCells !== nextProps.disabledCells || this.props.columns !== nextProps.columns || this.props.columnWidthValues !== nextProps.columnWidthValues;
         }
     }, {
         key: 'render',
