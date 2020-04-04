@@ -3,13 +3,14 @@
   "description": "react-spreadsheet-grid demo",
   "dependencies": {
     "lodash.set": "^4.3.2",
-    "react": "^16.1.0",
-    "react-dom": "^16.1.0",
-    "react-spreadsheet-grid": "0.0.5"
+    "react": "latest",
+    "react-dom": "latest",
+    "react-spreadsheet-grid": "latest"
   },
   "scripts": {
     "watch": "webpack-dev-server --port 5050 --hot --progress --colors",
-    "build": "NODE_ENV='production' webpack"
+    "build": "NODE_ENV='production' webpack",
+    "start": "npm i & npm run build"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.6",
