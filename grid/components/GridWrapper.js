@@ -1,5 +1,5 @@
-import React from 'react';
-import { Grid, Input, Select } from './Grid';
+import React, { useState } from 'react';
+import { Grid, Input, Select } from 'react-spreadsheet-grid';
 import set from 'lodash.set';
 import usersData from './../users.json';
 
@@ -53,39 +53,20 @@ function getRowKey(row) {
     return row.login.sha1;
 }
 
-class GridWrapper extends React.PureComponent {
+const GridWrapper = () => {
+    const [rows, setRows] = useState(usersData.results);
 
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            rows: usersData.results,
-            columns: this.initColumns(),
-            columnWidthValues: {
-                photo: 6,
-                position: 15,
-                registered: 9,
-                contract: 10,
-                location: 25
-            }
-        };
-    }
-
-    onFieldChange(rowKey, field, value) {
-        const modifiedRows = [].concat(this.state.rows);
+    const onFieldChange = (rowKey, field) => (value) => {
+        const modifiedRows = [].concat(rows);
         const row = modifiedRows.find((row) => {
             return getRowKey(row) === rowKey;
         });
 
         set(row, field, value);
-
-        this.setState({
-            rows: modifiedRows,
-            blurCurrentFocus: true
-        });
+        setRows(modifiedRows)
     }
 
-    initColumns() {
+    const initColumns = () => {
         return [
             {
                 title: 'Photo',
@@ -97,6 +78,7 @@ class GridWrapper extends React.PureComponent {
                     );
                 },
                 id: 'photo',
+                width: 6,
                 getCellClassName: () => "Grid__photoCell"
             },
             {
@@ -106,7 +88,7 @@ class GridWrapper extends React.PureComponent {
                         <Input
                             value={row.name.first}
                             focus={focus}
-                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'name.first')}
+                            onChange={onFieldChange(getRowKey(row), 'name.first')}
                         />
                     );
                 },
@@ -119,7 +101,7 @@ class GridWrapper extends React.PureComponent {
                         <Input
                             value={row.name.last}
                             focus={focus}
-                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'name.last')}
+                            onChange={onFieldChange(getRowKey(row), 'name.last')}
                         />
                     );
                 },
@@ -132,7 +114,7 @@ class GridWrapper extends React.PureComponent {
                         <Input
                             value={row.login.username}
                             focus={focus}
-                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'login.username')}
+                            onChange={onFieldChange(getRowKey(row), 'login.username')}
                         />
                     );
                 },
@@ -146,11 +128,12 @@ class GridWrapper extends React.PureComponent {
                             items={positions}
                             selectedId={row.positionId}
                             isOpen={focus}
-                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'positionId')}
+                            onChange={onFieldChange(getRowKey(row), 'positionId')}
                         />
                     );
                 },
-                id: 'position'
+                id: 'position',
+                width: 15,
             },
             {
                 title: 'Registered',
@@ -159,11 +142,12 @@ class GridWrapper extends React.PureComponent {
                         <Input
                             value={row.registered.split(' ')[0]}
                             focus={focus}
-                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'registered')}
+                            onChange={onFieldChange(getRowKey(row), 'registered')}
                         />
                     );
                 },
-                id: 'registered'
+                id: 'registered',
+                width: 9,
             },
             {
                 title: 'Contract',
@@ -173,11 +157,12 @@ class GridWrapper extends React.PureComponent {
                             items={contractTypes}
                             selectedId={row.contractTypeId}
                             isOpen={focus}
-                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'contractTypeId')}
+                            onChange={onFieldChange(getRowKey(row), 'contractTypeId')}
                         />
                     );
                 },
-                id: 'contract'
+                id: 'contract',
+                width: 10,
             },
             {
                 title: 'Location',
@@ -189,45 +174,54 @@ class GridWrapper extends React.PureComponent {
                             row.location.state + ', ' +
                             row.location.street}
                             focus={focus}
-                            onChange={this.onFieldChange.bind(this, getRowKey(row), 'location.street')}
+                            onChange={onFieldChange(getRowKey(row), 'location.street')}
                         />
                     );
                 },
-                id: 'location'
+                id: 'location',
+                width: 25
             }
         ];
     }
 
-    render() {
-        return (
-            <div
-                key="grid"
-                className="GridWrapper"
-            >
-                <a
-                    href="https://gist.github.com/denisraslov/d65bc39514e99580b39cd99e9977caf8"
-                    target="_blank"
-                    className="ExampleCodeButton"
-                >
-                    Open source code
-                </a>
-                <Grid
-                    columns={this.state.columns}
-                    rows={this.state.rows}
-                    blurCurrentFocus={this.state.blurCurrentFocus}
-                    getRowKey={row => getRowKey(row)}
-                    rowHeight={60}
-                    disabledCellChecker={(row, columnId) => {
-                        return columnId === 'photo' ||
-                            columnId === 'location' ||
-                            columnId === 'registered';
-                    }}
-                    isColumnsResizable
-                    columnWidthValues={this.state.columnWidthValues}
-                />
-            </div>
-        );
+    const [columns, setColumns] = useState(initColumns())
+
+    const onColumnResize = (widthValues) => {
+        const newColumns = [].concat(columns)
+        Object.keys(widthValues).forEach((columnId) => {
+            const column = columns.find(({ id }) => id === columnId);
+            column.width = widthValues[columnId]
+        })
+        setColumns(newColumns)
     }
+
+    return (
+        <div
+            key="grid"
+            className="GridWrapper"
+        >
+            <a
+                href="https://gist.github.com/denisraslov/d65bc39514e99580b39cd99e9977caf8"
+                target="_blank"
+                className="ExampleCodeButton"
+            >
+                Open source code
+            </a>
+            <Grid
+                columns={columns}
+                rows={rows}
+                getRowKey={row => getRowKey(row)}
+                rowHeight={60}
+                disabledCellChecker={(row, columnId) => {
+                    return columnId === 'photo' ||
+                        columnId === 'location' ||
+                        columnId === 'registered';
+                }}
+                isColumnsResizable
+                onColumnResize={onColumnResize}
+            />
+        </div>
+    );
 }
 
 export default GridWrapper;
